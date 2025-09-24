@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>chatter</title>
+<title>Simple Chat</title>
 <style>
     body { background-color: #ccc; color: #000; font-family: monospace; }
     #chat { max-width: 500px; margin: 50px auto; }
@@ -21,30 +21,38 @@
 <script>
 const messagesDiv = document.getElementById('messages');
 
+// Fetch messages every 1 second
 async function fetchMessages() {
-    const res = await fetch('api/index.php');
-    const messages = await res.json();
-    messagesDiv.innerHTML = messages.map(m => `[${m.time}] ${m.text}`).join('<br>');
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    try {
+        const res = await fetch('api/index.php');
+        const messages = await res.json();
+        messagesDiv.innerHTML = messages.map(m => `[${m.time}] ${m.text}`).join('<br>');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    } catch (e) {
+        console.error('Failed to fetch messages', e);
+    }
 }
 
-// Send a new message
+// Send message
 async function sendMessage() {
     const input = document.getElementById('input');
     const text = input.value.trim();
     if (!text) return;
 
-    await fetch('api/index.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-    });
-
-    input.value = '';
-    fetchMessages();
+    try {
+        await fetch('api/index.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        input.value = '';
+        fetchMessages();
+    } catch (e) {
+        console.error('Failed to send message', e);
+    }
 }
 
-// Poll messages every second
+// Start polling
 setInterval(fetchMessages, 1000);
 fetchMessages();
 </script>
