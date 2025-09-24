@@ -1,32 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Vercel + PHP</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.1.4/tailwind.min.css" />
+<meta charset="UTF-8">
+<title>chatter</title>
+<style>
+    body { background-color: #ccc; color: #000; font-family: monospace; }
+    #chat { max-width: 500px; margin: 50px auto; }
+    #messages { height: 300px; overflow-y: scroll; border: 1px solid #000; padding: 10px; background-color: #eee; }
+    input { width: 80%; }
+    button { width: 18%; }
+</style>
 </head>
+<body>
+<div id="chat">
+    <div id="messages"></div>
+    <input type="text" id="input" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
 
-<body class="font-mono bg-gray-300 w-screen h-screen flex items-center justify-center">
-    <div>
-        <div class="text-5xl font-bold">
-            Vercel + PHP
-            <a class="inline-block" href="https://vercel.com/new/project?template=https://github.com/vercel-community/php/tree/master">
-                <img src="https://vercel.com/button" alt="Deploy to Vercel" />
-            </a>
-        </div>
+<script>
+const messagesDiv = document.getElementById('messages');
 
-        <p class="text-xl my-10">Use the <strong>deploy</strong> button or follow these steps.</p>
+async function fetchMessages() {
+    const res = await fetch('api/index.php');
+    const messages = await res.json();
+    messagesDiv.innerHTML = messages.map(m => `[${m.time}] ${m.text}`).join('<br>');
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
 
-        <ol class="list-decimal my-4 mx-8 text-normal">
-            <li class="py-2">Clone repository <code class="bg-pink-600 rounded rounded-sm text-white p-2">git clone git@github.com:vercel-community/php.git</code></li>
-            <li class="py-2">Switch to <code>/php</code> folder and run <code class="underline font-bold">vercel</code></li>
-            <li class="py-2">Open generated <strong>*.vercel.app</strong> domain [<a class="text-pink-800" href="https://php.vercel.app">demo</a>]</li>
-            <li class="py-2">Discover <strong>*.vercel.app/api/</strong> PHP functions [<a class="text-pink-800" href="https://php.vercel.app/api/">demo</a>] </li>
-        </ol>
-    </div>
+// Send a new message
+async function sendMessage() {
+    const input = document.getElementById('input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    await fetch('api/index.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+    });
+
+    input.value = '';
+    fetchMessages();
+}
+
+// Poll messages every second
+setInterval(fetchMessages, 1000);
+fetchMessages();
+</script>
 </body>
-
 </html>
