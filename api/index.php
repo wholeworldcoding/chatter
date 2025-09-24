@@ -3,19 +3,19 @@ header('Content-Type: application/json');
 
 $messagesFile = __DIR__ . '/messages.json';
 
-// Initialize the file if it doesn't exist
+// Initialize file if not exists
 if (!file_exists($messagesFile)) {
     file_put_contents($messagesFile, json_encode([]));
 }
 
-// Handle GET: return messages
+// GET: return messages
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $messages = json_decode(file_get_contents($messagesFile), true);
     echo json_encode($messages);
     exit;
 }
 
-// Handle POST: add a new message
+// POST: add message
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!isset($data['text']) || trim($data['text']) === '') {
